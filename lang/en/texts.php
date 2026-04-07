@@ -39,6 +39,7 @@ $lang = array(
     'description' => 'Description',
     'unit_cost' => 'Unit Cost',
     'quantity' => 'Quantity',
+    'rental_days' => 'Rental Days',
     'line_total' => 'Line Total',
     'subtotal' => 'Subtotal',
     'net_subtotal' => 'Net',
