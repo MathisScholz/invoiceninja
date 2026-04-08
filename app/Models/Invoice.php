@@ -211,6 +211,7 @@ class Invoice extends BaseModel
         'vendor_id',
         'e_invoice',
         'location_id',
+        'default_rental_days',
     ];
 
     protected $casts = [
@@ -228,6 +229,7 @@ class Invoice extends BaseModel
         'custom_surcharge_tax3' => 'bool',
         'custom_surcharge_tax4' => 'bool',
         'e_invoice' => 'object',
+        'default_rental_days' => 'float',
         'sync' => InvoiceSync::class,
 
     ];
