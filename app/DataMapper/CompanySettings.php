@@ -116,6 +116,10 @@ class CompanySettings extends BaseSettings
 
     public $quote_number_counter = 1; //@implemented
 
+    public $order_confirmation_number_pattern = ''; //@implemented
+
+    public $order_confirmation_number_counter = 1; //@implemented
+
     public $client_number_pattern = ''; //@implemented
 
     public $client_number_counter = 1; //@implemented
@@ -180,11 +184,15 @@ class CompanySettings extends BaseSettings
 
     public $quote_terms = ''; //@implemented
 
+    public $order_confirmation_terms = ''; //@implemented
+
     public $invoice_taxes = 0; // ? used in AP only?
 
     public $invoice_design_id = 'Wpmbk5ezJn'; //@implemented
 
     public $quote_design_id = 'Wpmbk5ezJn'; //@implemented
+
+    public $order_confirmation_design_id = 'Wpmbk5ezJn'; //@implemented
 
     public $credit_design_id = 'Wpmbk5ezJn'; //@implemented
 
@@ -199,6 +207,12 @@ class CompanySettings extends BaseSettings
     public $require_purchase_order_signature = false;  //@TODO ben to confirm
 
     public $invoice_footer = ''; //@implemented
+
+    public $order_confirmation_footer = ''; //@implemented
+
+    public $order_confirmation_public_notes = ''; //@implemented
+
+    public $auto_create_order_confirmation = false; //@implemented
 
     public $credit_footer = ''; //@implemented
 
@@ -253,6 +267,8 @@ class CompanySettings extends BaseSettings
 
     public $email_subject_quote = '';  //@implemented
 
+    public $email_subject_order_confirmation = '';  //@implemented
+
     public $email_subject_credit = ''; //@implemented
 
     public $email_subject_payment = ''; //@implemented
@@ -270,6 +286,8 @@ class CompanySettings extends BaseSettings
     public $email_template_credit = ''; //@implemented
 
     public $email_template_quote = ''; //@implemented
+
+    public $email_template_order_confirmation = ''; //@implemented
 
     public $email_template_payment = ''; //@implemented
 
@@ -593,12 +611,20 @@ class CompanySettings extends BaseSettings
         'qr_iban' => 'string',
         'email_subject_purchase_order' => 'string',
         'email_template_purchase_order' => 'string',
+        'email_subject_order_confirmation' => 'string',
+        'email_template_order_confirmation' => 'string',
         'require_purchase_order_signature' => 'bool',
         'purchase_order_public_notes' => 'string',
         'purchase_order_terms' => 'string',
         'purchase_order_design_id' => 'string',
         'purchase_order_footer' => 'string',
         'purchase_order_number_pattern' => 'string',
+        'order_confirmation_public_notes' => 'string',
+        'order_confirmation_terms' => 'string',
+        'order_confirmation_design_id' => 'string',
+        'order_confirmation_footer' => 'string',
+        'order_confirmation_number_pattern' => 'string',
+        'auto_create_order_confirmation' => 'bool',
         'page_numbering_alignment' => 'string',
         'page_numbering' => 'bool',
         'auto_archive_invoice_cancelled' => 'bool',
@@ -665,6 +691,7 @@ class CompanySettings extends BaseSettings
         'email_subject_statement' => 'string',
         'signature_on_pdf' => 'bool',
         'quote_footer' => 'string',
+        'order_confirmation_footer' => 'string',
         'page_size' => 'string',
         'page_layout' => 'string',
         'font_size' => 'int',
@@ -719,11 +746,13 @@ class CompanySettings extends BaseSettings
         'email_signature' => 'string',
         'email_subject_invoice' => 'string',
         'email_subject_quote' => 'string',
+        'email_subject_order_confirmation' => 'string',
         'email_subject_credit' => 'string',
         'email_subject_payment' => 'string',
         'email_subject_payment_partial' => 'string',
         'email_template_invoice' => 'string',
         'email_template_quote' => 'string',
+        'email_template_order_confirmation' => 'string',
         'email_template_credit' => 'string',
         'email_template_payment' => 'string',
         'email_template_payment_partial' => 'string',
@@ -753,10 +782,13 @@ class CompanySettings extends BaseSettings
         'phone' => 'string',
         'postal_code' => 'string',
         'quote_design_id' => 'string',
+        'order_confirmation_design_id' => 'string',
         'credit_design_id' => 'string',
         'quote_number_pattern' => 'string',
         'quote_number_counter' => 'integer',
         'quote_terms' => 'string',
+        'order_confirmation_number_counter' => 'integer',
+        'order_confirmation_terms' => 'string',
         'recurring_number_prefix' => 'string',
         'reset_counter_frequency_id' => 'integer',
         'reset_counter_date' => 'string',
@@ -850,6 +882,7 @@ class CompanySettings extends BaseSettings
     public static $string_casts = [
         'invoice_design_id',
         'quote_design_id',
+        'order_confirmation_design_id',
         'credit_design_id',
         'purchase_order_design_id',
         'statement_design_id',

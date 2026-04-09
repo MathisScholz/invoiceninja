@@ -12,6 +12,7 @@
 
 namespace App\Services\Quote;
 
+use App\Factory\CloneQuoteToOrderConfirmationFactory;
 use App\Utils\Ninja;
 use App\Models\Quote;
 use App\Models\Project;
@@ -92,8 +93,12 @@ class QuoteService
         return $this->getEQuote($contact);
     }
 
-    public function sendEmail($contact = null, $email_type = 'quote'): self
+    public function sendEmail($contact = null, $email_type = null): self
     {
+        $email_type ??= $this->quote->isOrderConfirmation()
+            ? Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION
+            : Quote::DOCUMENT_TYPE_QUOTE;
+
         (new SendEmail($this->quote, $email_type, $contact))->run();
 
         return $this;
@@ -134,7 +139,9 @@ class QuoteService
             $contact = $this->quote->invitations->first()->contact;
         }
 
-        if ($this->quote->client->getSetting('auto_convert_quote')) {
+        if ($this->quote->isQuoteDocument() && $this->quote->client->getSetting('auto_create_order_confirmation')) {
+            $this->createOrderConfirmation();
+        } elseif ($this->quote->client->getSetting('auto_convert_quote')) {
             $this->convertToInvoice();
 
             $this->invoice
@@ -146,6 +153,38 @@ class QuoteService
         event(new QuoteWasApproved($contact, $this->quote, $this->quote->company, Ninja::eventVars()));
 
         return $this;
+    }
+
+    public function createOrderConfirmation(): Quote
+    {
+        if ($this->quote->isOrderConfirmation()) {
+            return $this->quote;
+        }
+
+        if ($existing = $this->quote->order_confirmations()->withTrashed()->first()) {
+            if ($existing->trashed()) {
+                $existing->restore();
+            }
+
+            return $existing;
+        }
+
+        $order_confirmation = CloneQuoteToOrderConfirmationFactory::create(
+            $this->quote,
+            auth()->user()?->id ?? $this->quote->user_id
+        );
+
+        $order_confirmation->client_id = $this->quote->client_id;
+        $order_confirmation->company_id = $this->quote->company_id;
+        $order_confirmation->assigned_user_id = $this->quote->assigned_user_id;
+
+        $order_confirmation = $order_confirmation->service()
+            ->fillDefaults()
+            ->applyNumber()
+            ->createInvitations()
+            ->save();
+
+        return $order_confirmation;
     }
 
 
@@ -174,6 +213,10 @@ class QuoteService
 
         if (! $contact) {
             $contact = $this->quote->invitations->first()->contact;
+        }
+
+        if ($this->quote->isQuoteDocument() && $this->quote->client->getSetting('auto_create_order_confirmation')) {
+            $this->createOrderConfirmation();
         }
 
         event(new QuoteWasApproved($contact, $this->quote, $this->quote->company, Ninja::eventVars()));
@@ -214,16 +257,29 @@ class QuoteService
     {
         $settings = $this->quote->client->getMergedSettings();
 
+        $design_setting = $this->quote->isOrderConfirmation()
+            ? 'order_confirmation_design_id'
+            : 'quote_design_id';
+        $footer_setting = $this->quote->isOrderConfirmation()
+            ? 'order_confirmation_footer'
+            : 'quote_footer';
+        $terms_setting = $this->quote->isOrderConfirmation()
+            ? 'order_confirmation_terms'
+            : 'quote_terms';
+        $public_notes_setting = $this->quote->isOrderConfirmation()
+            ? 'order_confirmation_public_notes'
+            : null;
+
         if (! $this->quote->design_id) {
-            $this->quote->design_id = $this->decodePrimaryKey($settings->quote_design_id);
+            $this->quote->design_id = $this->decodePrimaryKey($settings->{$design_setting});
         }
 
         if (! isset($this->quote->footer)) {
-            $this->quote->footer = $settings->quote_footer;
+            $this->quote->footer = $settings->{$footer_setting};
         }
 
         if (! isset($this->quote->terms)) {
-            $this->quote->terms = $settings->quote_terms;
+            $this->quote->terms = $settings->{$terms_setting};
         }
 
         /* If client currency differs from the company default currency, then insert the client exchange rate on the model.*/
@@ -232,7 +288,25 @@ class QuoteService
         }
 
         if (! isset($this->quote->public_notes)) {
-            $this->quote->public_notes = $this->quote->client->public_notes;
+            if ($this->quote->isOrderConfirmation()) {
+                $public_notes = trim((string) ($settings->{$public_notes_setting} ?? ''));
+
+                if ($public_notes === '') {
+                    $quote_date = $this->quote->source_quote?->date?->format($this->quote->company->date_format())
+                        ?? $this->quote->date?->format($this->quote->company->date_format())
+                        ?? '';
+
+                    $reference = trim((string) ($this->quote->source_quote?->number ?? ''));
+                    $from_reference = $reference !== '' ? " {$reference}" : '';
+                    $from_date = $quote_date !== '' ? " vom {$quote_date}" : '';
+
+                    $public_notes = trim("Hiermit bestaetigen wir Ihnen den Auftrag zu Angebot{$from_reference}{$from_date}.");
+                }
+
+                $this->quote->public_notes = $public_notes;
+            } else {
+                $this->quote->public_notes = $this->quote->client->public_notes;
+            }
         }
 
         return $this;

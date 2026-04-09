@@ -144,6 +144,24 @@ class QuoteFilters extends QueryFilters
         return $this->builder->where('number', $number);
     }
 
+    public function document_type(string $document_type = ''): Builder
+    {
+        if (strlen($document_type) == 0) {
+            return $this->builder;
+        }
+
+        return $this->builder->where('document_type', $document_type);
+    }
+
+    public function source_quote_id(string $source_quote_id = ''): Builder
+    {
+        if (strlen($source_quote_id) == 0) {
+            return $this->builder;
+        }
+
+        return $this->builder->where('source_quote_id', $this->decodePrimaryKey($source_quote_id));
+    }
+
     /**
      * Sorts the list based on $sort.
      *
@@ -248,6 +266,12 @@ class QuoteFilters extends QueryFilters
      */
     public function entityFilter(): Builder
     {
-        return $this->builder->company();
+        $this->builder->company();
+
+        if (! $this->request->has('document_type')) {
+            $this->builder->where('document_type', Quote::DOCUMENT_TYPE_QUOTE);
+        }
+
+        return $this->builder;
     }
 }

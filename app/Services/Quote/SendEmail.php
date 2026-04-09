@@ -68,6 +68,7 @@ class SendEmail
     {
         return match ($template) {
             'quote' => 'email_template_quote',
+            'order_confirmation' => 'email_template_order_confirmation',
             'reminder1' => 'email_quote_template_reminder1',
             'custom1' => 'email_template_custom1',
             'custom2' => 'email_template_custom2',

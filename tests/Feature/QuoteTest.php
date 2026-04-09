@@ -323,6 +323,81 @@ class QuoteTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function testApproveCreatesOrderConfirmationWhenEnabled()
+    {
+        $settings = $this->company->settings;
+        $settings->auto_create_order_confirmation = true;
+        $settings->order_confirmation_number_pattern = 'AB-{$counter}';
+        $settings->order_confirmation_number_counter = 1;
+        $settings->order_confirmation_public_notes = '';
+        $this->company->settings = $settings;
+        $this->company->save();
+
+        $this->quote = $this->quote->fresh();
+        $this->quote->service()->approveWithNoCoversion()->save();
+
+        $order_confirmation = Quote::query()
+            ->where('source_quote_id', $this->quote->id)
+            ->where('document_type', Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION)
+            ->first();
+
+        $this->assertNotNull($order_confirmation);
+        $this->assertSame(Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION, $order_confirmation->document_type);
+        $this->assertSame($this->quote->id, $order_confirmation->source_quote_id);
+        $this->assertSame('AB-1', $order_confirmation->number);
+        $this->assertStringContainsString($this->quote->number, $order_confirmation->public_notes);
+        $this->assertStringContainsString(
+            $this->quote->date->format($this->company->date_format()),
+            $order_confirmation->public_notes
+        );
+        $this->assertCount(
+            $this->quote->invitations()->count(),
+            $order_confirmation->invitations()->get()
+        );
+    }
+
+    public function testActionCreateOrderConfirmationReturnsExistingDocument()
+    {
+        $settings = $this->company->settings;
+        $settings->order_confirmation_number_pattern = 'AB-{$counter}';
+        $settings->order_confirmation_number_counter = 1;
+        $settings->order_confirmation_footer = 'Standard Auftragsbestaetigung Footer';
+        $this->company->settings = $settings;
+        $this->company->save();
+
+        $response = $this->withHeaders([
+            'X-API-SECRET' => config('ninja.api_secret'),
+            'X-API-TOKEN' => $this->token,
+        ])->get('/api/v1/quotes/'.$this->quote->hashed_id.'/create_order_confirmation');
+
+        $response->assertStatus(200);
+
+        $first = $response->json('data');
+
+        $this->assertSame(Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION, $first['document_type']);
+        $this->assertSame($this->quote->hashed_id, $first['source_quote_id']);
+        $this->assertSame('AB-1', $first['number']);
+        $this->assertSame('Standard Auftragsbestaetigung Footer', $first['footer']);
+
+        $response = $this->withHeaders([
+            'X-API-SECRET' => config('ninja.api_secret'),
+            'X-API-TOKEN' => $this->token,
+        ])->get('/api/v1/quotes/'.$this->quote->hashed_id.'/create_order_confirmation');
+
+        $response->assertStatus(200);
+
+        $second = $response->json('data');
+
+        $this->assertSame($first['id'], $second['id']);
+        $this->assertSame(
+            1,
+            Quote::query()
+                ->where('source_quote_id', $this->quote->id)
+                ->where('document_type', Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION)
+                ->count()
+        );
+    }
+
     public function testQuoteRESTEndPoints()
     {
         $response = null;

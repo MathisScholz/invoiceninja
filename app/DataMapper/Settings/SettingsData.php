@@ -104,6 +104,10 @@ class SettingsData
 
     public int $quote_number_counter = 1; //@implemented
 
+    public string $order_confirmation_number_pattern = ''; //@implemented
+
+    public int $order_confirmation_number_counter = 1; //@implemented
+
     public string $client_number_pattern = ''; //@implemented
 
     public int $client_number_counter = 1; //@implemented
@@ -168,11 +172,15 @@ class SettingsData
 
     public string $quote_terms = ''; //@implemented
 
+    public string $order_confirmation_terms = ''; //@implemented
+
     public int $invoice_taxes = 0; // ? used in AP only?
 
     public string $invoice_design_id = 'Wpmbk5ezJn'; //@implemented
 
     public string $quote_design_id = 'Wpmbk5ezJn'; //@implemented
+
+    public string $order_confirmation_design_id = 'Wpmbk5ezJn'; //@implemented
 
     public string $credit_design_id = 'Wpmbk5ezJn'; //@implemented
 
@@ -187,6 +195,12 @@ class SettingsData
     public bool $require_purchase_order_signature = false;  //@TODO ben to confirm
 
     public string $invoice_footer = ''; //@implemented
+
+    public string $order_confirmation_footer = ''; //@implemented
+
+    public string $order_confirmation_public_notes = ''; //@implemented
+
+    public bool $auto_create_order_confirmation = false; //@implemented
 
     public string $credit_footer = ''; //@implemented
 
@@ -236,6 +250,8 @@ class SettingsData
 
     public string $email_subject_quote = '';  //@implemented
 
+    public string $email_subject_order_confirmation = '';  //@implemented
+
     public string $email_subject_credit = ''; //@implemented
 
     public string $email_subject_payment = ''; //@implemented
@@ -253,6 +269,8 @@ class SettingsData
     public string $email_template_credit = ''; //@implemented
 
     public string $email_template_quote = ''; //@implemented
+
+    public string $email_template_order_confirmation = ''; //@implemented
 
     public string $email_template_payment = ''; //@implemented
 

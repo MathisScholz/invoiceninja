@@ -45,8 +45,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|null $location_id
  * @property int|null $recurring_id
  * @property int|null $design_id
+ * @property int|null $source_quote_id
  * @property int|null $invoice_id
  * @property string|null $number
+ * @property string $document_type
  * @property float $discount
  * @property bool $is_amount_discount
  * @property bool $auto_bill_enabled
@@ -115,6 +117,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read mixed $valid_until
  * @property-read int|null $invitations_count
  * @property-read \App\Models\Invoice|null $invoice
+ * @property-read \App\Models\Quote|null $source_quote
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Quote> $order_confirmations
  * @property-read \App\Models\QuoteInvitation|null $invitations
  * @property-read \App\Models\Project|null $project
  * @property-read \App\Models\User $user
@@ -177,6 +181,8 @@ class Quote extends BaseModel
         'line_items',
         'client_id',
         'footer',
+        'document_type',
+        'source_quote_id',
         'custom_surcharge1',
         'custom_surcharge2',
         'custom_surcharge3',
@@ -207,6 +213,10 @@ class Quote extends BaseModel
 
     ];
 
+    public const DOCUMENT_TYPE_QUOTE = 'quote';
+
+    public const DOCUMENT_TYPE_ORDER_CONFIRMATION = 'order_confirmation';
+
     public const STATUS_DRAFT = 1;
 
     public const STATUS_SENT = 2;
@@ -226,9 +236,10 @@ class Quote extends BaseModel
 
         return [
             'id' => $this->company->db . ":" . $this->id,
-            'name' => ctrans('texts.quote') . " " . ($this->number ?? '') . " | " . $this->client->present()->name() . ' | ' . Number::formatMoney($this->amount, $this->company) . ' | ' . $this->translateDate($this->date, $this->company->date_format(), $locale),
+            'name' => $this->translate_entity() . " " . ($this->number ?? '') . " | " . $this->client->present()->name() . ' | ' . Number::formatMoney($this->amount, $this->company) . ' | ' . $this->translateDate($this->date, $this->company->date_format(), $locale),
             'hashed_id' => $this->hashed_id,
             'number' => (string) $this->number,
+            'document_type' => (string) ($this->document_type ?? self::DOCUMENT_TYPE_QUOTE),
             'is_deleted' => (bool) $this->is_deleted,
             'amount' => (float) $this->amount,
             'balance' => (float) $this->balance,
@@ -308,6 +319,16 @@ class Quote extends BaseModel
     public function invoice(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Invoice::class)->withTrashed();
+    }
+
+    public function source_quote(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(self::class, 'source_quote_id')->withTrashed();
+    }
+
+    public function order_confirmations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(self::class, 'source_quote_id');
     }
 
     public function assigned_user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -452,8 +473,22 @@ class Quote extends BaseModel
         return $this->calc()->getTotal();
     }
 
+    public function isOrderConfirmation(): bool
+    {
+        return $this->document_type === self::DOCUMENT_TYPE_ORDER_CONFIRMATION;
+    }
+
+    public function isQuoteDocument(): bool
+    {
+        return ! $this->isOrderConfirmation();
+    }
+
     public function translate_entity(): string
     {
+        if ($this->isOrderConfirmation()) {
+            return ctrans('texts.order_confirmation');
+        }
+
         return ctrans('texts.quote');
     }
 
@@ -524,6 +559,10 @@ class Quote extends BaseModel
         switch ($reminder_template) {
             case 'quote':
                 event(new QuoteWasEmailed($invitation, $invitation->company, Ninja::eventVars(auth()->user() ? auth()->user()->id : null), $reminder_template));
+                break;
+            case 'order_confirmation':
+            case 'email_template_order_confirmation':
+                event(new QuoteWasEmailed($invitation, $invitation->company, Ninja::eventVars(auth()->user() ? auth()->user()->id : null), 'order_confirmation'));
                 break;
             case 'email_quote_template_reminder1':
             case 'reminder1':

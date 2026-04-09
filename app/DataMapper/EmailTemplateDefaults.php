@@ -19,6 +19,7 @@ class EmailTemplateDefaults
     public array $templates = [
         'email_template_invoice',
         'email_template_quote',
+        'email_template_order_confirmation',
         'email_template_credit',
         'email_template_payment',
         'email_template_payment_partial',
@@ -47,6 +48,8 @@ class EmailTemplateDefaults
                 return self::emailInvoiceTemplate();
             case 'email_template_quote':
                 return self::emailQuoteTemplate();
+            case 'email_template_order_confirmation':
+                return self::emailOrderConfirmationTemplate();
             case 'email_template_credit':
                 return self::emailCreditTemplate();
             case 'email_template_payment':
@@ -82,6 +85,8 @@ class EmailTemplateDefaults
 
             case 'email_subject_quote':
                 return self::emailQuoteSubject();
+            case 'email_subject_order_confirmation':
+                return self::emailOrderConfirmationSubject();
 
             case 'email_subject_credit':
                 return self::emailCreditSubject();
@@ -200,6 +205,18 @@ class EmailTemplateDefaults
         $quote_message = '<p>$client<br><br>' . self::transformText('quote_message') . '</p><div>$view_button</div>';
 
         return $quote_message;
+    }
+
+    public static function emailOrderConfirmationSubject()
+    {
+        return ctrans('texts.order_confirmation_subject', ['number' => '$number', 'account' => '$company.name']);
+    }
+
+    public static function emailOrderConfirmationTemplate()
+    {
+        $order_confirmation_message = '<p>$client<br><br>' . self::transformText('order_confirmation_message') . '</p><div>$view_button</div>';
+
+        return $order_confirmation_message;
     }
 
     public static function emailPaymentSubject()

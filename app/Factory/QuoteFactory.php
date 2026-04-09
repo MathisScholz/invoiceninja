@@ -20,6 +20,8 @@ class QuoteFactory
     {
         $quote = new Quote();
         $quote->status_id = Quote::STATUS_DRAFT;
+        $quote->document_type = Quote::DOCUMENT_TYPE_QUOTE;
+        $quote->source_quote_id = null;
         $quote->number = null;
         $quote->discount = 0;
         $quote->is_amount_discount = true;

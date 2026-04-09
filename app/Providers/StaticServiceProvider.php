@@ -220,6 +220,10 @@ class StaticServiceProvider extends ServiceProvider
                     'subject' => EmailTemplateDefaults::emailQuoteSubject(),
                     'body' => EmailTemplateDefaults::emailQuoteTemplate(),
                 ],
+                'order_confirmation' => [
+                    'subject' => EmailTemplateDefaults::emailOrderConfirmationSubject(),
+                    'body' => EmailTemplateDefaults::emailOrderConfirmationTemplate(),
+                ],
                 'payment' => [
                     'subject' => EmailTemplateDefaults::emailPaymentSubject(),
                     'body' => EmailTemplateDefaults::emailPaymentTemplate(),
