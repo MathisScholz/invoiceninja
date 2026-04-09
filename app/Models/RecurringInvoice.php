@@ -234,6 +234,7 @@ class RecurringInvoice extends BaseModel
         'uses_inclusive_taxes',
         'e_invoice',
         'location_id',
+        'default_rental_days',
     ];
 
     protected $casts = [
@@ -244,6 +245,7 @@ class RecurringInvoice extends BaseModel
         'created_at' => 'timestamp',
         'deleted_at' => 'timestamp',
         'e_invoice' => 'object',
+        'default_rental_days' => 'float',
     ];
 
     protected $appends = [

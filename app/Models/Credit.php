@@ -202,6 +202,7 @@ class Credit extends BaseModel
         'vendor_id',
         'location_id',
         'e_invoice',
+        'default_rental_days',
     ];
 
     protected $casts = [
@@ -213,6 +214,7 @@ class Credit extends BaseModel
         'is_amount_discount' => 'bool',
         'e_invoice' => 'object',
         'sync' => InvoiceSync::class,
+        'default_rental_days' => 'float',
 
     ];
 
