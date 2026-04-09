@@ -117,6 +117,7 @@ class QuoteTransformer extends EntityTransformer
             'created_at' => (int) $quote->created_at,
             'number' => $quote->number ?: '',
             'discount' => (float) $quote->discount,
+            'default_rental_days' => (float) ($quote->default_rental_days ?? 0),
             'po_number' => $quote->po_number ?: '',
             'date' => $quote->date ?: '',
             'last_sent_date' => $quote->last_sent_date ?: '',
