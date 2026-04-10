@@ -75,7 +75,7 @@ trait GeneratesCounter
 
             $counter_entity = $client->group_settings ?: $client->company;
         } else {
-            $counter = $client->company->settings->{$counter_string};
+            $counter = $client->company->settings->{$counter_string} ?? 1;
             $counter_entity = $client->company;
         }
 
