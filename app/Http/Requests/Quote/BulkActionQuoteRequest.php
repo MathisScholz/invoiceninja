@@ -32,7 +32,7 @@ class BulkActionQuoteRequest extends Request
         $input = $this->all();
 
         $rules = [
-            'action' => 'sometimes|in:template,convert_to_invoice,convert_to_project,email,bulk_download,bulk_print,clone_to_invoice,approve,download,restore,archive,delete,send_email,mark_sent',
+            'action' => 'sometimes|in:template,convert_to_invoice,convert_to_project,email,bulk_download,bulk_print,clone_to_invoice,approve,download,restore,archive,delete,send_email,mark_sent,create_order_confirmation,clone_to_order_confirmation,convert_to_order_confirmation',
             'ids' => 'required|array',
             'template' => 'sometimes|string',
             'template_id' => 'sometimes|string',
