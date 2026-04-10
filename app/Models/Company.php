@@ -1005,9 +1005,9 @@ class Company extends BaseModel
             $date_formats = app('date_formats');
             $date_format = $this->getSetting('date_format_id');
 
-            return $date_formats->first(function ($item) use ($date_format) {
+            return ($date_formats->first(function ($item) use ($date_format) {
                 return $item->id == $date_format;
-            })->format;
+            }) ?? $date_formats->first())?->format ?? 'Y-m-d';
         });
     }
 
