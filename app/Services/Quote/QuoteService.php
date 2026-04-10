@@ -292,9 +292,10 @@ class QuoteService
                 $public_notes = trim((string) ($settings->{$public_notes_setting} ?? ''));
 
                 if ($public_notes === '') {
-                    $quote_date = $this->quote->source_quote?->date?->format($this->quote->company->date_format())
-                        ?? $this->quote->date?->format($this->quote->company->date_format())
-                        ?? '';
+                    $raw_date = $this->quote->source_quote?->date ?? $this->quote->date ?? null;
+                    $quote_date = $raw_date
+                        ? \Carbon\Carbon::parse($raw_date)->format($this->quote->company->date_format())
+                        : '';
 
                     $reference = trim((string) ($this->quote->source_quote?->number ?? ''));
                     $from_reference = $reference !== '' ? " {$reference}" : '';
