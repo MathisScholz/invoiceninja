@@ -12,6 +12,7 @@
 
 namespace App\Http\Requests\Quote;
 
+use App\Models\Quote;
 use App\Http\Requests\Request;
 use App\Utils\Traits\ChecksEntityStatus;
 use App\Utils\Traits\CleanLineItems;
@@ -51,6 +52,11 @@ class UpdateQuoteRequest extends Request
 
         $rules['number'] = ['bail', 'sometimes', 'nullable', Rule::unique('quotes')->where('company_id', $user->company()->id)->ignore($this->quote->id)];
         $rules['client_id'] = ['bail', 'sometimes', Rule::in([$this->quote->client_id])];
+        $rules['document_type'] = ['bail', 'sometimes', Rule::in([
+            Quote::DOCUMENT_TYPE_QUOTE,
+            Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION,
+        ])];
+        $rules['source_quote_id'] = ['bail', 'sometimes', 'nullable', Rule::exists('quotes', 'id')->where('company_id', $user->company()->id)];
         $rules['line_items'] = 'array';
         $rules['discount'] = 'sometimes|numeric|max:99999999999999';
         $rules['is_amount_discount'] = ['boolean'];

@@ -46,6 +46,11 @@ class StoreQuoteRequest extends Request
         $rules = [];
 
         $rules['client_id'] = ['required', 'bail', Rule::exists('clients', 'id')->where('company_id', $user->company()->id)->where('is_deleted', 0)];
+        $rules['document_type'] = ['sometimes', 'bail', Rule::in([
+            Quote::DOCUMENT_TYPE_QUOTE,
+            Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION,
+        ])];
+        $rules['source_quote_id'] = ['sometimes', 'nullable', 'bail', Rule::exists('quotes', 'id')->where('company_id', $user->company()->id)];
 
         $rules['file'] = 'bail|sometimes|array';
         $rules['file.*'] = $this->fileValidation();
@@ -129,6 +134,12 @@ class StoreQuoteRequest extends Request
         }
         if (!isset($input['date'])) {
             $input['date'] = now()->addSeconds($user->company()->utc_offset())->format('Y-m-d');
+        }
+        if (!isset($input['document_type']) || ! in_array($input['document_type'], [
+            Quote::DOCUMENT_TYPE_QUOTE,
+            Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION,
+        ], true)) {
+            $input['document_type'] = Quote::DOCUMENT_TYPE_QUOTE;
         }
         if (isset($input['client_id']) && isset($input['partial_due_date']) && (!isset($input['due_date']) || strlen($input['due_date']) <= 1)) {
             $client = \App\Models\Client::withTrashed()->find($input['client_id']);

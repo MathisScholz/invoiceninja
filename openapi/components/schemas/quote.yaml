@@ -20,6 +20,14 @@
           description: 'The status of the quote represented by a unique identifier'
           type: string
           example: ''
+        document_type:
+          description: 'The quote document type. Defaults to quote, order_confirmation is used for generated order confirmations.'
+          type: string
+          example: quote
+        source_quote_id:
+          description: 'The hashed identifier of the source quote when this record is an order confirmation.'
+          type: string
+          example: Opnel5aKBz
         number:
           description: 'The unique alpha-numeric quote number for the quote per company'
           type: string

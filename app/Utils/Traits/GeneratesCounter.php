@@ -75,7 +75,7 @@ trait GeneratesCounter
 
             $counter_entity = $client->group_settings ?: $client->company;
         } else {
-            $counter = $client->company->settings->{$counter_string};
+            $counter = $client->company->settings->{$counter_string} ?? 1;
             $counter_entity = $client->company;
         }
 
@@ -102,12 +102,18 @@ trait GeneratesCounter
     private function getNumberPattern($entity, Client $client)
     {
         $pattern_string = '';
+        $entity_class = $entity instanceof BaseModel ? $entity::class : $entity;
 
-        switch ($entity) {
+        switch ($entity_class) {
             case Invoice::class:
                 $pattern_string = 'invoice_number_pattern';
                 break;
             case Quote::class:
+                if ($entity instanceof Quote && $entity->isOrderConfirmation()) {
+                    $pattern_string = 'order_confirmation_number_pattern';
+                    break;
+                }
+
                 $pattern_string = 'quote_number_pattern';
                 break;
             case RecurringInvoice::class:
@@ -129,11 +135,16 @@ trait GeneratesCounter
 
     private function getEntityCounter($entity, $client)
     {
-        switch ($entity) {
+        $entity_class = $entity instanceof BaseModel ? $entity::class : $entity;
+
+        switch ($entity_class) {
             case Invoice::class:
                 return 'invoice_number_counter';
 
             case Quote::class:
+                if ($entity instanceof Quote && $entity->isOrderConfirmation()) {
+                    return 'order_confirmation_number_counter';
+                }
 
                 if ($this->hasSharedCounter($client, 'quote')) {
                     return 'invoice_number_counter';
@@ -209,7 +220,7 @@ trait GeneratesCounter
      */
     public function getNextQuoteNumber(Client $client, ?Quote $quote)
     {
-        $entity_number = $this->getNextEntityNumber(Quote::class, $client);
+        $entity_number = $this->getNextEntityNumber($quote ?? Quote::class, $client);
 
         return $this->replaceUserVars($quote, $entity_number);
     }
@@ -606,6 +617,7 @@ trait GeneratesCounter
         $settings->reset_counter_date = $new_reset_date->format('Y-m-d');
         $settings->invoice_number_counter = 1;
         $settings->quote_number_counter = 1;
+        $settings->order_confirmation_number_counter = 1;
         $settings->credit_number_counter = 1;
         $settings->ticket_number_counter = 1;
         $settings->payment_number_counter = 1;
@@ -688,6 +700,7 @@ trait GeneratesCounter
         $settings->reset_counter_date = $new_reset_date->format('Y-m-d');
         $settings->invoice_number_counter = 1;
         $settings->quote_number_counter = 1;
+        $settings->order_confirmation_number_counter = 1;
         $settings->credit_number_counter = 1;
         $settings->ticket_number_counter = 1;
         $settings->payment_number_counter = 1;

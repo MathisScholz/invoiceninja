@@ -171,6 +171,10 @@ class QuoteController extends BaseController
         $quote = QuoteFactory::create($user->company()->id, $user->id);
         $quote->date = now()->addSeconds($user->company()->utc_offset())->format('Y-m-d');
 
+        if ($request->input('document_type') === Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION) {
+            $quote->document_type = Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION;
+        }
+
         return $this->itemResponse($quote);
     }
 
@@ -762,6 +766,11 @@ class QuoteController extends BaseController
                 $quote = CloneQuoteFactory::create($quote, auth()->user()->id);
 
                 return $this->itemResponse($quote);
+
+            case 'clone_to_order_confirmation':
+            case 'convert_to_order_confirmation':
+            case 'create_order_confirmation':
+                return $this->itemResponse($quote->service()->createOrderConfirmation());
 
             case 'approve':
                 if (! in_array($quote->status_id, [Quote::STATUS_SENT, Quote::STATUS_DRAFT])) {

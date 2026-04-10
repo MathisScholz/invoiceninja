@@ -98,6 +98,9 @@ class TemplateEngine
         if (strlen($this->entity ?? '') > 1 && strlen($this->entity_id ?? '') > 1) {
             $class = 'App\Models\\' . ucfirst(Str::camel($this->entity));
             $this->entity_obj = $class::query()->withTrashed()->where('id', $this->decodePrimaryKey($this->entity_id))->company()->first();
+        } elseif (stripos($this->template, 'order_confirmation') !== false && $quote = Quote::query()->where('document_type', Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION)->whereHas('invitations')->withTrashed()->company()->first()) {
+            $this->entity = 'quote';
+            $this->entity_obj = $quote;
         } elseif (stripos($this->template, 'quote') !== false && $quote = Quote::query()->whereHas('invitations')->withTrashed()->company()->first()) {
             $this->entity = 'quote';
             $this->entity_obj = $quote;
@@ -282,6 +285,8 @@ class TemplateEngine
 
         if (!$this->entity && $this->template && str_contains($this->template, 'purchase_order')) {
             $this->entity = 'purchaseOrder';
+        } elseif (!$this->entity && $this->template && str_contains($this->template, 'order_confirmation')) {
+            $this->entity = 'quote';
         } elseif (str_contains($this->template, 'payment')) {
             $this->entity = 'payment';
         }
@@ -371,6 +376,9 @@ class TemplateEngine
                     'user_id' => $user->id,
                     'company_id' => $user->company()->id,
                     'client_id' => $client->id,
+                    'document_type' => $this->template && str_contains($this->template, 'order_confirmation')
+                        ? Quote::DOCUMENT_TYPE_ORDER_CONFIRMATION
+                        : Quote::DOCUMENT_TYPE_QUOTE,
                 ]);
 
                 $this->entity_obj = $quote;

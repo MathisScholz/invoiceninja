@@ -27,6 +27,7 @@ class SendEmailRequest extends Request
     public array $templates = [
         'email_template_invoice',
         'email_template_quote',
+        'email_template_order_confirmation',
         'email_template_credit',
         'email_template_payment',
         'email_template_payment_partial',

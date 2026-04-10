@@ -145,6 +145,11 @@ class EntitySentObject
                 $this->template_subject = 'texts.notification_quote_sent_subject';
                 $this->template_body = 'texts.notification_quote_sent';
                 break;
+            case 'order_confirmation':
+            case 'email_template_order_confirmation':
+                $this->template_subject = 'texts.notification_order_confirmation_sent_subject';
+                $this->template_body = 'texts.notification_order_confirmation_sent';
+                break;
             case 'email_quote_template_reminder1':
                 $this->template_subject = 'texts.notification_quote_reminder1_sent_subject';
                 $this->template_body = 'texts.notification_quote_sent';

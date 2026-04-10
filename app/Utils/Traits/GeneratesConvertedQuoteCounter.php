@@ -188,7 +188,7 @@ trait GeneratesConvertedQuoteCounter
      */
     public function getNextQuoteNumber(Client $client, ?Quote $quote)
     {
-        $entity_number = $this->getNextEntityNumber(Quote::class, $client);
+        $entity_number = $this->getNextEntityNumber($quote ?? Quote::class, $client);
 
         return $this->replaceUserVars($quote, $entity_number);
     }

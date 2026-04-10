@@ -272,22 +272,42 @@ class HtmlEngine
         }
 
         if ($this->entity_string == 'quote') {
+            $is_order_confirmation = $this->entity instanceof \App\Models\Quote
+                && $this->entity->isOrderConfirmation();
+            $document_label = $is_order_confirmation
+                ? ctrans('texts.order_confirmation')
+                : ctrans('texts.quote');
+            $document_number_label = $is_order_confirmation
+                ? ctrans('texts.order_confirmation_number')
+                : ctrans('texts.quote_number');
+            $document_number_short_label = $is_order_confirmation
+                ? ctrans('texts.order_confirmation_number_short')
+                : ctrans('texts.quote_number_short');
+            $document_terms_label = $is_order_confirmation
+                ? ctrans('texts.order_confirmation_terms')
+                : ctrans('texts.quote_terms');
+            $document_view_label = $is_order_confirmation
+                ? ctrans('texts.view_order_confirmation')
+                : ctrans('texts.view_quote');
+            $document_date_label = $is_order_confirmation
+                ? ctrans('texts.order_confirmation_date')
+                : ctrans('texts.quote_date');
 
 
             $data['$term_days'] = ['value' => $this->client->getSetting('valid_until'), 'label' => ctrans('texts.valid_until')];
 
-            $data['$entity'] = ['value' => ctrans('texts.quote'), 'label' => ctrans('texts.quote')];
-            $data['$number'] = ['value' => $this->entity->number ?: '', 'label' => ctrans('texts.quote_number')];
-            $data['$number_short'] = ['value' => $this->entity->number ?: '', 'label' => ctrans('texts.quote_number_short')];
-            $data['$entity.terms'] = ['value' => Helpers::processReservedKeywords(\nl2br($this->entity->terms ?: ''), $this->client) ?: '', 'label' => ctrans('texts.quote_terms')];
+            $data['$entity'] = ['value' => $document_label, 'label' => $document_label];
+            $data['$number'] = ['value' => $this->entity->number ?: '', 'label' => $document_number_label];
+            $data['$number_short'] = ['value' => $this->entity->number ?: '', 'label' => $document_number_short_label];
+            $data['$entity.terms'] = ['value' => Helpers::processReservedKeywords(\nl2br($this->entity->terms ?: ''), $this->client) ?: '', 'label' => $document_terms_label];
             $data['$terms'] = &$data['$entity.terms'];
-            $data['$view_link'] = ['value' => $this->buildViewButton($this->invitation->getLink(), ctrans('texts.view_quote')), 'label' => ctrans('texts.view_quote')];
+            $data['$view_link'] = ['value' => $this->buildViewButton($this->invitation->getLink(), $document_view_label), 'label' => $document_view_label];
             $data['$viewLink'] = &$data['$view_link'];
             $data['$viewButton'] = &$data['$view_link'];
             $data['$view_button'] = &$data['$view_link'];
             $data['$approveButton'] = ['value' => $this->buildViewButton($this->invitation->getLink(), ctrans('texts.view_quote')), 'label' => ctrans('texts.approve')];
-            $data['$view_url'] = ['value' => $this->invitation->getLink(), 'label' => ctrans('texts.view_quote')];
-            $data['$date'] = ['value' => $this->translateDate($this->entity->date, $this->client->date_format(), $this->client->locale()) ?: ' ', 'label' => ctrans('texts.quote_date')];
+            $data['$view_url'] = ['value' => $this->invitation->getLink(), 'label' => $document_view_label];
+            $data['$date'] = ['value' => $this->translateDate($this->entity->date, $this->client->date_format(), $this->client->locale()) ?: ' ', 'label' => $document_date_label];
 
             $data['$quote.custom1'] = ['value' => $this->helpers->formatCustomFieldValue($this->company->custom_fields, 'quote1', $this->entity->custom_value1, $this->client) ?: ' ', 'label' => $this->helpers->makeCustomField($this->company->custom_fields, 'quote1')];
             $data['$quote.custom2'] = ['value' => $this->helpers->formatCustomFieldValue($this->company->custom_fields, 'quote2', $this->entity->custom_value2, $this->client) ?: ' ', 'label' => $this->helpers->makeCustomField($this->company->custom_fields, 'quote2')];
@@ -316,6 +336,19 @@ class HtmlEngine
 
             $data['$payment_qrcode'] = ['value' => '', 'label' => ctrans('texts.pay_now')];
             $data['$payment_qrcode_raw'] = ['value' => '', 'label' => ctrans('texts.pay_now')];
+
+            if ($is_order_confirmation) {
+                $source_quote = $this->entity->source_quote;
+                $source_quote_date = $source_quote?->date
+                    ? $this->translateDate($source_quote->date, $this->client->date_format(), $this->client->locale())
+                    : '';
+
+                $data['$source_quote.number'] = ['value' => $source_quote?->number ?: '', 'label' => ctrans('texts.quote_number')];
+                $data['$source_quote.date'] = ['value' => $source_quote_date, 'label' => ctrans('texts.quote_date')];
+                $data['$order_confirmation.reference_number'] = &$data['$source_quote.number'];
+                $data['$order_confirmation.reference_date'] = &$data['$source_quote.date'];
+                $data['$quote.reference'] = &$data['$source_quote.number'];
+            }
 
         }
 
