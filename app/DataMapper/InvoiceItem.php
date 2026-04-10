@@ -24,6 +24,8 @@ class InvoiceItem
 
     public $product_cost = 0;
 
+    public $rental_days = 1;
+
     public $notes = '';
 
     public $discount = 0;
@@ -81,6 +83,7 @@ class InvoiceItem
         'quantity' => 'float',
         'cost' => 'float',
         'product_cost' => 'float',
+        'rental_days' => 'float',
         'product_key' => 'string',
         'notes' => 'string',
         'discount' => 'float',

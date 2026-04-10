@@ -101,6 +101,7 @@ class CreditTransformer extends EntityTransformer
             'is_deleted' => (bool) $credit->is_deleted,
             'number' => $credit->number ?: '',
             'discount' => (float) $credit->discount,
+            'default_rental_days' => (float) ($credit->default_rental_days ?? 0),
             'po_number' => $credit->po_number ?: '',
             'date' => $credit->date ?: '',
             'last_sent_date' => $credit->last_sent_date ?: '',

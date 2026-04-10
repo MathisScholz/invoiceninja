@@ -237,7 +237,8 @@ class InvoiceItemSum
 
     private function sumLineItem()
     {
-        $this->setLineTotal($this->item->cost * $this->item->quantity);
+        $rentalDays = isset($this->item->rental_days) && $this->item->rental_days > 0 ? $this->item->rental_days : 1;
+        $this->setLineTotal($this->item->cost * $this->item->quantity * $rentalDays);
 
         return $this;
     }

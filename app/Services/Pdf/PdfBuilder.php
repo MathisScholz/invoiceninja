@@ -1092,6 +1092,12 @@ class PdfBuilder
                 $data[$key][$table_type . '.discount'] = '';
             }
 
+            if (property_exists($item, 'rental_days')) {
+                $data[$key][$table_type . '.rental_days'] = ($item->rental_days == 0) ? '' : $this->service->config->formatValueNoTrailingZeroes($item->rental_days);
+            } else {
+                $data[$key][$table_type . '.rental_days'] = '';
+            }
+
             if (isset($item->tax_rate1)) {
                 $data[$key][$table_type . '.tax_rate1'] = $this->service->config->formatValueNoTrailingZeroes(floatval($item->tax_rate1)) . '%';
                 $data[$key][$table_type . '.tax1'] = &$data[$key][$table_type . '.tax_rate1'];

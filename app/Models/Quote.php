@@ -188,6 +188,7 @@ class Quote extends BaseModel
         'uses_inclusive_taxes',
         'vendor_id',
         'location_id',
+        'default_rental_days',
     ];
 
     protected $casts = [
@@ -204,6 +205,7 @@ class Quote extends BaseModel
         'is_amount_discount' => 'bool',
         'e_invoice' => 'object',
         'sync' => QuoteSync::class,
+        'default_rental_days' => 'float',
 
     ];
 

@@ -139,6 +139,7 @@ class InvoiceTransformer extends EntityTransformer
             'is_deleted' => (bool) $invoice->is_deleted,
             'number' => $invoice->number ?: '',
             'discount' => (float) $invoice->discount,
+            'default_rental_days' => (float) ($invoice->default_rental_days ?? 1),
             'po_number' => $invoice->po_number ?: '',
             'date' => $invoice->date ?: '',
             'last_sent_date' => $invoice->last_sent_date ?: '',
